@@ -1,11 +1,11 @@
 import os
-import pandas as pd
 
 def load_imdb_dataset(base_path="data/aclImdb_v1/aclImdb"):
-    # This is an inner helper function that loads either "train" or "test" depending on what folder we pass.
+    # This is an inner helper function that loads either "train" or "test"
+    # depending on what folder we pass.
     def load_split(split):
         texts = []
-        labels = []
+        labels = [] # 0 = negative, 1 = positive
         '''
         We loop twice:
             once for the pos subfolder and assign label 1
@@ -22,7 +22,8 @@ def load_imdb_dataset(base_path="data/aclImdb_v1/aclImdb"):
                         texts.append(f.read().strip())
                     # store the numeric label (1 or 0)
                     labels.append(label_value)
-        # After reading all files for that split (train or test), we return two lists.
+        # After reading all files for that split (train or test), we return
+        # two lists.
         return texts, labels
 
     train_texts, train_labels = load_split("train")
