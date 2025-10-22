@@ -43,8 +43,11 @@ X_train, X_val, y_train, y_val = train_test_split(
 # =========================
 # This step is critical: it changes raw text into numerical vectors
 vectorizer = TfidfVectorizer(
-    max_features=20000,   # limit vocabulary size for speed
-    ngram_range=(1, 2)    # use single words and 2-word combinations
+    max_features=30000,        # allow a slightly larger vocabulary
+    ngram_range=(1, 3),        # include 3-word phrases
+    lowercase=True,            # convert all text to lowercase
+    stop_words="english",      # remove common stopwords
+    sublinear_tf=True          # reduce weight of very frequent words
 )
 '''
 ngram_range=(1,2)
@@ -67,7 +70,10 @@ X_test_tfidf = vectorizer.transform(test_texts)
 # 5. CHOOSE & TRAIN MODEL
 # =========================
 # Logistic Regression is a simple but effective classifier
-clf = LogisticRegression(max_iter=1000)
+clf = LogisticRegression(
+    max_iter=2000,             # give model a bit more room to converge
+    class_weight="balanced"    # balance positive/negative learning weight
+)
 clf.fit(X_train_tfidf, y_train)
 
 # =========================

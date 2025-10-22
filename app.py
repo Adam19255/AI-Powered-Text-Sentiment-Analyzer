@@ -1,51 +1,73 @@
 import streamlit as st
 import joblib
 import numpy as np
+from transformers import pipeline
 
-# ==============================
-# 1. Load the saved model
-# ==============================
-# We load the dictionary we saved earlier (vectorizer + model)
+# ==================================
+# 1. Load Classical Model
+# ==================================
 model_data = joblib.load("models/sentiment_model.joblib")
 vectorizer = model_data["vectorizer"]
 model = model_data["model"]
 
-# ==============================
-# 2. Streamlit UI Setup
-# ==============================
+# ==================================
+# 2. Load Transformer Model
+# ==================================
+@st.cache_resource
+def load_transformer():
+    return pipeline("sentiment-analysis", model="models/distilbert-imdb", tokenizer="models/distilbert-imdb")
+
+transformer_model = load_transformer()
+
+# ==================================
+# 3. Streamlit UI
+# ==================================
 st.title("AI Sentiment Analyzer")
 
-st.write("Type a movie review below and the AI will classify it as **Positive** or **Negative** sentiment.")
+st.write("This demo compares a classical ML model (TF-IDF + Logistic Regression) with a Transformer model (DistilBERT).")
 
-# Multiline text box for user input
 user_input = st.text_area("Enter your text here:", height=200)
 
-# ==============================
-# 3. When user clicks Analyze
-# ==============================
 if st.button("Analyze Sentiment"):
-
     if user_input.strip() == "":
-        st.warning("⚠️ Please enter some text before analyzing.")
+        st.warning("⚠️ Please enter some text.")
     else:
-        # Convert the input text to tf-idf vector
+        # ========= Classical Prediction =========
         X_input = vectorizer.transform([user_input])
-
-        # Predict class (0 or 1) and probability
         pred_class = model.predict(X_input)[0]
         pred_proba = model.predict_proba(X_input)[0][pred_class]
+        classical_label = "Positive" if pred_class == 1 else "Negative"
+        classical_color = "green" if pred_class == 1 else "red"
 
-        # Convert class number to label
-        sentiment_label = "Positive" if pred_class == 1 else "Negative"
+        # ========= Transformer Prediction =========
+        transformer_result = transformer_model(user_input)[0]
+        raw_label = transformer_result['label']   # POSITIVE or NEGATIVE
+        raw_score = transformer_result['score']   # probability
 
-        # Choose color
-        color = "green" if pred_class == 1 else "red"
+        # Determine NEUTRAL using threshold
+        if raw_score < 0.35:
+            transformer_label = "NEUTRAL"
+            transformer_color = "blue"
+            final_score = raw_score
+        elif raw_score > 0.65:
+            transformer_label = raw_label   # POSITIVE or NEGATIVE
+            transformer_color = "green" if raw_label == "POSITIVE" else "red"
+            final_score = raw_score
+        else:
+            transformer_label = "NEUTRAL"
+            transformer_color = "blue"
+            final_score = raw_score
 
-        # ==============================
-        # 4. Display predictions
-        # ==============================
+        # ========= Display Classical =========
+        st.subheader("Classical Model (TF-IDF + Logistic Regression)")
         st.markdown(
-            f"<h2 style='color:{color};'>Sentiment: {sentiment_label}</h2>",
+            f"<h3 style='color:{classical_color};'>Sentiment: {classical_label} ({pred_proba*100:.2f}%)</h3>",
             unsafe_allow_html=True
         )
-        st.write(f"**Confidence:** {pred_proba*100:.2f}%")
+
+        # ========= Display Transformer =========
+        st.subheader("Transformer Model (DistilBERT)")
+        st.markdown(
+            f"<h3 style='color:{transformer_color};'>Sentiment: {transformer_label} ({final_score*100:.2f}%)</h3>",
+            unsafe_allow_html=True
+        )
