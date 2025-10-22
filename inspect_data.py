@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 
 def load_imdb_dataset(base_path="data/aclImdb_v1/aclImdb"):
     # This is an inner helper function that loads either "train" or "test"
@@ -13,9 +14,10 @@ def load_imdb_dataset(base_path="data/aclImdb_v1/aclImdb"):
         '''
         for label_name, label_value in [("pos", 1), ("neg", 0)]:
             folder = os.path.join(base_path, split, label_name)
-            for filename in os.listdir(folder):
+            files = os.listdir(folder)
+            for filename in tqdm(files, desc=f"Loading {split}/{label_name}", unit="file"):
+                file_path = os.path.join(folder, filename)
                 if filename.endswith(".txt"):
-                    file_path = os.path.join(folder, filename)
                     # read its contents (the review text)
                     with open(file_path, "r", encoding="utf-8") as f:
                         # store the review

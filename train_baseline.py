@@ -35,7 +35,7 @@ X_train, X_val, y_train, y_val = train_test_split(
     train_labels,
     test_size=0.20,
     random_state=42,  # ensures consistent results each run
-    stratify=train_labels  # keeps positive/negative balance
+    stratify=train_labels  # keep the positive/negative ratio the same in both splits
 )
 
 # =========================
@@ -46,6 +46,15 @@ vectorizer = TfidfVectorizer(
     max_features=20000,   # limit vocabulary size for speed
     ngram_range=(1, 2)    # use single words and 2-word combinations
 )
+'''
+ngram_range=(1,2)
+Use 1-word sequences (e.g. "great") AND 2-word sequences (e.g. "not good")
+Bigrams capture meaning like “not good” which is different than “good”
+If we didn’t include (2), the model would think: "not good" “contains ‘good’ → positive” (wrong!)
+But with (1,2) it understands:
+“not good” = negative
+bigrams help catch negation
+'''
 
 # The vectorizer "learns" vocabulary only from training text
 X_train_tfidf = vectorizer.fit_transform(X_train)
