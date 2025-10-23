@@ -1,14 +1,3 @@
----
-title: AI-Powered Text Sentiment Analyzer
-emoji: 💬
-colorFrom: blue
-colorTo: purple
-sdk: streamlit
-sdk_version: "1.39.0"
-app_file: app.py
-pinned: false
----
-
 # 💬 AI-Powered Text Sentiment Analyzer
 
 This project is an **end-to-end machine learning application** that analyzes the sentiment of text input using both a **classical ML model** and a **Transformer-based model (DistilBERT)**.
