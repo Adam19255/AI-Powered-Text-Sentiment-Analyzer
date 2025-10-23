@@ -2,13 +2,8 @@
 Fine-tune DistilBERT on the IMDB dataset (local aclImdb files).
 Saves the fine-tuned model & tokenizer under ./models/distilbert-imdb/
 """
-
 from pprint import pprint
-
-# core libs
 import numpy as np
-
-# huggingface libs
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
@@ -17,11 +12,7 @@ from transformers import (
 )
 from datasets import Dataset, DatasetDict
 from sklearn.utils import shuffle
-
-# sklearn metrics
 from sklearn.metrics import accuracy_score, f1_score, precision_recall_fscore_support
-
-# load the loader you already have
 from inspect_data import load_imdb_dataset
 
 def compute_metrics(p):
@@ -34,7 +25,7 @@ def compute_metrics(p):
 
     acc = accuracy_score(y_true, y_pred)
     f1 = f1_score(y_true, y_pred, average="macro")
-    precision, recall, f1_per_label, _ = precision_recall_fscore_support(y_true, y_pred, average=None, labels=[0,1])
+    precision, recall, _ = precision_recall_fscore_support(y_true, y_pred, average=None, labels=[0,1])
     return {"accuracy": acc, "f1_macro": f1, "precision_per_label": precision.tolist(), "recall_per_label": recall.tolist()}
 
 def build_hf_dataset(train_texts, train_labels, test_texts, test_labels, val_fraction=0.10, random_seed=42):

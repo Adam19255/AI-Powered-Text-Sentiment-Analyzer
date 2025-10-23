@@ -13,7 +13,7 @@ model = model_data["model"]
 # ==================================
 # 2. Load Transformer Model
 # ==================================
-@st.cache_resource
+@st.cache_resource # prevents reloading DistilBERT every time the page reruns
 def load_transformer():
     return pipeline("sentiment-analysis", model="models/distilbert-imdb", tokenizer="models/distilbert-imdb")
 
@@ -33,9 +33,9 @@ if st.button("Analyze Sentiment"):
         st.warning("⚠️ Please enter some text.")
     else:
         # ========= Classical Prediction =========
-        X_input = vectorizer.transform([user_input])
-        pred_class = model.predict(X_input)[0]
-        pred_proba = model.predict_proba(X_input)[0][pred_class]
+        X_input = vectorizer.transform([user_input]) # Convert raw text → TF-IDF vector
+        pred_class = model.predict(X_input)[0] # Predict label 0(neg) or 1(pos)
+        pred_proba = model.predict_proba(X_input)[0][pred_class] # Get confidence score
         classical_label = "Positive" if pred_class == 1 else "Negative"
         classical_color = "green" if pred_class == 1 else "red"
 
